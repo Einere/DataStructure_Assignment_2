@@ -19,6 +19,7 @@
 #include <cctype>
 #include <cstring>
 #include <string>
+#include <map>
 
 using namespace std;
 

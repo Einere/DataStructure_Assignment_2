@@ -4,6 +4,7 @@
 int calculator(istream& ins);
 void once_calculate(istream& ins, stack<int>& numbers, stack<char>& operators, int& number, char& symbol);
 void recursive_calculate(stack<int>& numbers, stack<char>& operators);
+void print_result(stack<int>& numbers);
 
 int calculator(istream& ins) {
 	const char LEFT_PARENTHESIS = '(';
@@ -38,7 +39,9 @@ int calculator(istream& ins) {
 				operators.push(symbol);
 				left_parenthesis++;
 				if (operators.top() != LEFT_PARENTHESIS) {
-					numbers.push(number);
+					if (number != 0) {
+						numbers.push(number);
+					}
 					left_parenthesis--;
 				}
 				
@@ -60,10 +63,11 @@ int calculator(istream& ins) {
 					once_calculate(ins, numbers, operators, number, symbol);
 				}
 				
-				//if peek == ')'
 				if (operators.top() == RIGHT_PARENTHESIS) {
+					// addicional action if peek == ')'
 					right_parenthesis++;
 					operators.pop();
+					//remove ')' from operators
 
 					while (operators.top() != LEFT_PARENTHESIS) {
 						recursive_calculate(numbers, operators);
@@ -119,14 +123,17 @@ void recursive_calculate(stack<int>& numbers, stack<char>& operators) {
 	operators.pop();
 }
 
-int main()
-{
-	do{
+void print_result() {
+	do {
 		int result = calculator(cin);
 		cout << "result : " << result << endl;
 		cin.ignore(INT_MAX, '\n');
 	} while (cin && cin.peek() != '0');
+}
 
+int main()
+{
+	print_result();
     return 0;
 }
 

@@ -4,6 +4,7 @@
 int calculator(istream& ins);
 
 int calculator(istream& ins) {
+	const char LEFT_PARENTHESIS = '(';
 	const char RIGHT_PARENTHESIS = ')';
 	
 	//priority mapping
@@ -15,7 +16,10 @@ int calculator(istream& ins) {
 	stack<int> numbers;
 	stack<char> operators;
 	int number = 0;
+	int left_parenthesis = 0;
+	int right_parenthesis = 0;
 	char symbol;
+
 
 	
 	while (ins && ins.peek() != '\n') {
@@ -28,35 +32,83 @@ int calculator(istream& ins) {
 		}
 		else {
 			//peek is not digit
-			if (operators.empty()) {
-				//if operators is empty
+			if (operators.empty() || ins.peek() == LEFT_PARENTHESIS || operators.top() == LEFT_PARENTHESIS) {
+				//if operators is empty or peek is '(' or operator.top is '('
 				ins >> symbol;
-				numbers.push(number);
 				operators.push(symbol);
+				left_parenthesis++;
+				if (operators.top() != LEFT_PARENTHESIS) {
+					numbers.push(number);
+					left_parenthesis--;
+				}
+				
 			}
 			else if (priority[operators.top()] < priority[(char)ins.peek()]) {
 				//if peek > top
-				ins >> symbol;
 				numbers.push(number);
+				ins >> symbol;
 				operators.push(symbol);
 			}
 			else {
 				//if peek <= top, operate(numbers.top, number) 
-				int num1, num2;
-				num1 = numbers.top(); numbers.pop();
-				num2 = number;
+				if (number == 0) {
+					int num1, num2;
+					num2 = numbers.top(); numbers.pop();
+					num1 = numbers.top(); numbers.pop();
 
-				switch (operators.top()) {
-				case '+': numbers.push(num1 + num2); break;
-				case '-': numbers.push(num1 - num2); break;
-				case '*': numbers.push(num1 * num2); break;
-				case '/': numbers.push(num1 / num2); break;
-				case '%': numbers.push(num1 % num2); break;
-				case '^': numbers.push((int)pow(num1, num2)); break;
+					switch (operators.top()) {
+					case '+': numbers.push(num1 + num2); break;
+					case '-': numbers.push(num1 - num2); break;
+					case '*': numbers.push(num1 * num2); break;
+					case '/': numbers.push(num1 / num2); break;
+					case '%': numbers.push(num1 % num2); break;
+					case '^': numbers.push(num1 ^ num2); break;
+					}
+					operators.pop();
+					ins >> symbol;
+					operators.push(symbol);
 				}
-				operators.pop();
-				ins >> symbol;
-				operators.push(symbol);
+				else {
+					int num1, num2;
+					num1 = numbers.top(); numbers.pop();
+					num2 = number;
+
+					switch (operators.top()) {
+					case '+': numbers.push(num1 + num2); break;
+					case '-': numbers.push(num1 - num2); break;
+					case '*': numbers.push(num1 * num2); break;
+					case '/': numbers.push(num1 / num2); break;
+					case '%': numbers.push(num1 % num2); break;
+					case '^': numbers.push((int)pow(num1, num2)); break;
+					}
+					operators.pop();
+					ins >> symbol;
+					operators.push(symbol);
+				}
+				
+				//if peek == ')'
+				if (operators.top() == RIGHT_PARENTHESIS) {
+					right_parenthesis++;
+					operators.pop();
+
+					while (operators.top() != LEFT_PARENTHESIS) {
+						int num1, num2;
+						num2 = numbers.top(); numbers.pop();
+						num1 = numbers.top(); numbers.pop();
+
+						switch (operators.top()) {
+						case '+': numbers.push(num1 + num2); break;
+						case '-': numbers.push(num1 - num2); break;
+						case '*': numbers.push(num1 * num2); break;
+						case '/': numbers.push(num1 / num2); break;
+						case '%': numbers.push(num1 % num2); break;
+						case '^': numbers.push(num1 ^ num2); break;
+						}
+						operators.pop();
+					}
+					operators.pop();
+					//remove '(' from operators
+				}
 			}
 			number = 0;
 		}
@@ -82,6 +134,9 @@ int calculator(istream& ins) {
 
 	return numbers.top();
 }
+
+
+
 
 int main()
 {

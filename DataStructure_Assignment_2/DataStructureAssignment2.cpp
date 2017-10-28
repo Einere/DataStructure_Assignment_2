@@ -2,6 +2,8 @@
 #include "stdafx.h"
 
 int calculator(istream& ins);
+void once_calculate(istream& ins, stack<int>& numbers, stack<char>& operators, int& number, char& symbol);
+void recursive_calculate(stack<int>& numbers, stack<char>& operators);
 
 int calculator(istream& ins) {
 	const char LEFT_PARENTHESIS = '(';
@@ -20,8 +22,6 @@ int calculator(istream& ins) {
 	int right_parenthesis = 0;
 	char symbol;
 
-
-	
 	while (ins && ins.peek() != '\n') {
 		//translate ins[0] ~ ins[end]
 		if (isdigit(ins.peek())) {
@@ -52,38 +52,12 @@ int calculator(istream& ins) {
 			else {
 				//if peek <= top, operate(numbers.top, number) 
 				if (number == 0) {
-					int num1, num2;
-					num2 = numbers.top(); numbers.pop();
-					num1 = numbers.top(); numbers.pop();
-
-					switch (operators.top()) {
-					case '+': numbers.push(num1 + num2); break;
-					case '-': numbers.push(num1 - num2); break;
-					case '*': numbers.push(num1 * num2); break;
-					case '/': numbers.push(num1 / num2); break;
-					case '%': numbers.push(num1 % num2); break;
-					case '^': numbers.push(num1 ^ num2); break;
-					}
-					operators.pop();
+					recursive_calculate(numbers, operators);
 					ins >> symbol;
 					operators.push(symbol);
 				}
 				else {
-					int num1, num2;
-					num1 = numbers.top(); numbers.pop();
-					num2 = number;
-
-					switch (operators.top()) {
-					case '+': numbers.push(num1 + num2); break;
-					case '-': numbers.push(num1 - num2); break;
-					case '*': numbers.push(num1 * num2); break;
-					case '/': numbers.push(num1 / num2); break;
-					case '%': numbers.push(num1 % num2); break;
-					case '^': numbers.push((int)pow(num1, num2)); break;
-					}
-					operators.pop();
-					ins >> symbol;
-					operators.push(symbol);
+					once_calculate(ins, numbers, operators, number, symbol);
 				}
 				
 				//if peek == ')'
@@ -92,19 +66,7 @@ int calculator(istream& ins) {
 					operators.pop();
 
 					while (operators.top() != LEFT_PARENTHESIS) {
-						int num1, num2;
-						num2 = numbers.top(); numbers.pop();
-						num1 = numbers.top(); numbers.pop();
-
-						switch (operators.top()) {
-						case '+': numbers.push(num1 + num2); break;
-						case '-': numbers.push(num1 - num2); break;
-						case '*': numbers.push(num1 * num2); break;
-						case '/': numbers.push(num1 / num2); break;
-						case '%': numbers.push(num1 % num2); break;
-						case '^': numbers.push(num1 ^ num2); break;
-						}
-						operators.pop();
+						recursive_calculate(numbers, operators);
 					}
 					operators.pop();
 					//remove '(' from operators
@@ -117,26 +79,45 @@ int calculator(istream& ins) {
 
 	//calculate remain numbers, operators
 	while (!operators.empty()) {
-		int num1, num2;
-		num2 = numbers.top(); numbers.pop();
-		num1 = numbers.top(); numbers.pop();
-
-		switch (operators.top()) {
-		case '+': numbers.push(num1 + num2); break;
-		case '-': numbers.push(num1 - num2); break;
-		case '*': numbers.push(num1 * num2); break;
-		case '/': numbers.push(num1 / num2); break;
-		case '%': numbers.push(num1 % num2); break;
-		case '^': numbers.push(num1 ^ num2); break;
-		}
-		operators.pop();
+		recursive_calculate(numbers, operators);
 	}
 
 	return numbers.top();
 }
 
+void once_calculate(istream& ins, stack<int>& numbers, stack<char>& operators, int& number, char& symbol) {
+	int num1, num2;
+	num1 = numbers.top(); numbers.pop();
+	num2 = number;
 
+	switch (operators.top()) {
+	case '+': numbers.push(num1 + num2); break;
+	case '-': numbers.push(num1 - num2); break;
+	case '*': numbers.push(num1 * num2); break;
+	case '/': numbers.push(num1 / num2); break;
+	case '%': numbers.push(num1 % num2); break;
+	case '^': numbers.push((int)pow(num1, num2)); break;
+	}
+	operators.pop();
+	ins >> symbol;
+	operators.push(symbol);
+}
 
+void recursive_calculate(stack<int>& numbers, stack<char>& operators) {
+	int num1, num2;
+	num2 = numbers.top(); numbers.pop();
+	num1 = numbers.top(); numbers.pop();
+
+	switch (operators.top()) {
+	case '+': numbers.push(num1 + num2); break;
+	case '-': numbers.push(num1 - num2); break;
+	case '*': numbers.push(num1 * num2); break;
+	case '/': numbers.push(num1 / num2); break;
+	case '%': numbers.push(num1 % num2); break;
+	case '^': numbers.push((int)pow(num1, num2)); break;
+	}
+	operators.pop();
+}
 
 int main()
 {
@@ -145,9 +126,6 @@ int main()
 		cout << "result : " << result << endl;
 		cin.ignore(INT_MAX, '\n');
 	} while (cin && cin.peek() != '0');
-	
-
-
 
     return 0;
 }

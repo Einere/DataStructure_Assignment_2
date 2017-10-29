@@ -106,6 +106,7 @@ int calculator(istream& ins) {
 			recursive_calculate(numbers, operators);
 		}
 	}
+
 	//return result
 	if (operators.empty() && balance == 0 && flag == true) {
 		return numbers.top();
@@ -157,6 +158,7 @@ void print_result() {
 		else {	cout << "Error!" << endl;	}
 		cin.ignore(INT_MAX, '\n');
 	} while (cin && cin.peek() != '0');
+	//repeat until input is "0\n"
 }
 
 int main()

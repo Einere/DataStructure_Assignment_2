@@ -24,6 +24,7 @@ int calculator(istream& ins) {
 	int right_parenthesis = 0;
 	char symbol;
 	flag = true;
+	bool is_init = false;
 
 	while (ins && ins.peek() != '\n' ) {
 		//translate ins[0] ~ ins[end]
@@ -32,6 +33,7 @@ int calculator(istream& ins) {
 			int tmp;
 			ins >> tmp;
 			number = number * 10 + tmp;
+			is_init = false;
 		}
 		else {
 			//peek is not digit
@@ -55,18 +57,11 @@ int calculator(istream& ins) {
 				operators.push(symbol);
 			}
 			else {
-				//if peek <= top, operate(numbers.top, number) 
-				if (number == 0) {
-					recursive_calculate(numbers, operators);
-					ins >> symbol;
-					operators.push(symbol);
-				}
-				else {
+				//if peek <= top or peek == ')'
+				if (ins.peek() == RIGHT_PARENTHESIS) {
+					//if peek == ')'
 					once_calculate(ins, numbers, operators, number, symbol);
-				}
-				
-				if (operators.top() == RIGHT_PARENTHESIS) {
-					// addicional action if peek == ')'
+
 					right_parenthesis++;
 					operators.pop();
 					//remove ')' from operators
@@ -77,14 +72,31 @@ int calculator(istream& ins) {
 					operators.pop();
 					//remove '(' from operators
 				}
+				else if (number == 0) {
+					//if peek < top and number == 0
+					if (numbers.size() == 1) {
+						once_calculate(ins, numbers, operators, number, symbol);
+					}
+					else {
+						recursive_calculate(numbers, operators);
+						ins >> symbol;
+						operators.push(symbol);
+					}
+					
+				}
+				else {
+					once_calculate(ins, numbers, operators, number, symbol);
+				}
+				
+				
 			}
 			number = 0;
-			
+			is_init = true;
 		}
 		
 	}
 	cout << "number : " << number << endl;
-	cout << "top : " << numbers.top() << endl;
+	//cout << "top : " << numbers.top() << endl;
 	cout << "flag : " << flag << endl;
 	cout << "aaaa" << endl;
 
@@ -99,7 +111,7 @@ int calculator(istream& ins) {
 		}
 		else {
 			//if end operator, numbers.size > 1
-			if (numbers.size() == 1) {
+			if (numbers.size() == 1) { 
 				//if number == 0, numbers.size > 1 -> devide by zero
 				cout << "eeee" << endl;
 				once_calculate(ins, numbers, operators, number, symbol);
@@ -127,7 +139,7 @@ int calculator(istream& ins) {
 
 void once_calculate(istream& ins, stack<int>& numbers, stack<char>& operators, int& number, char& symbol) {
 	int num1, num2;
-	num1 = numbers.top(); numbers.pop();
+	num1 = numbers.top(); if (!numbers.empty()) numbers.pop();
 	num2 = number;
 	switch (operators.top()) {
 	case '+': numbers.push(num1 + num2); break;
@@ -154,8 +166,8 @@ void once_calculate(istream& ins, stack<int>& numbers, stack<char>& operators, i
 
 void recursive_calculate(stack<int>& numbers, stack<char>& operators) {
 	int num1, num2;
-	num2 = numbers.top(); numbers.pop();
-	num1 = numbers.top(); numbers.pop();
+	num2 = numbers.top(); if (!numbers.empty()) numbers.pop();
+	num1 = numbers.top(); if (!numbers.empty()) numbers.pop();
 
 	switch (operators.top()) {
 	case '+': numbers.push(num1 + num2); break;

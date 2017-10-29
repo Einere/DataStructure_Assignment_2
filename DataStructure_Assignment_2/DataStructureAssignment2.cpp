@@ -1,11 +1,12 @@
 // DataStructureAssignment2.cpp : 콘솔 응용 프로그램에 대한 진입점을 정의합니다.
+// 컴소과 2013726058 최형준
 #include "stdafx.h"
 
 int calculator(istream& ins);
 void once_calculate(istream& ins, stack<int>& numbers, stack<char>& operators, int& number, char& symbol);
 void recursive_calculate(stack<int>& numbers, stack<char>& operators);
 void print_result();
-bool flag = true;
+bool flag = true; //to deal with "devided by zero"
 
 int calculator(istream& ins) {
 	const char LEFT_PARENTHESIS = '(';
@@ -20,22 +21,19 @@ int calculator(istream& ins) {
 	stack<int> numbers;
 	stack<char> operators;
 	int number = 0;
-	int left_parenthesis = 0;
-	int right_parenthesis = 0;
-	char symbol;
-	flag = true;
-	bool is_init = false;
-	
+	int balance = 0; //to deal with "parenthesis"
+	char symbol = NULL;
+	flag = true; 
+	bool meaning = true; //to deal with "choose once or recursive"
 
 	while (ins && ins.peek() != '\n' ) {
-		//translate ins[0] ~ ins[end]
+		//claculate ins[0] ~ ins[end]
 		if (isdigit(ins.peek())) {
 			//peek is digit, store number decimally
 			int tmp;
 			ins >> tmp;
 			number = number * 10 + tmp;
-			is_init = false;
-			
+			meaning = true;
 		}
 		else {
 			//peek is not digit
@@ -43,13 +41,13 @@ int calculator(istream& ins) {
 				//if operators is empty or peek is '(' or operator.top is '('
 				ins >> symbol;
 				operators.push(symbol);
-				left_parenthesis++;
+				balance++;
 				if (operators.top() != LEFT_PARENTHESIS) {
 					//if operators is empty or operators.top is '('
-					if (!is_init) {
+					if (meaning) {
 						numbers.push(number);
 					}
-					left_parenthesis--;
+					balance--;
 				}
 				
 			}
@@ -65,7 +63,7 @@ int calculator(istream& ins) {
 					//if peek == ')'
 					once_calculate(ins, numbers, operators, number, symbol);
 
-					right_parenthesis++;
+					balance--;
 					operators.pop();
 					//remove ')' from operators
 
@@ -77,7 +75,7 @@ int calculator(istream& ins) {
 				}
 				else if (priority[(char)ins.peek()] < priority[operators.top()]) {
 					//if peek < top 
-					if (!is_init) {
+					if (meaning) {
 						once_calculate(ins, numbers, operators, number, symbol);
 					}
 					else {
@@ -88,37 +86,31 @@ int calculator(istream& ins) {
 				}
 			}
 			number = 0;
-			is_init = true;
+			meaning = false;
 		}
-		
 	}
-	cout << "number : " << number << endl;
+	//cout << "number : " << number << endl;
 	//cout << "top : " << numbers.top() << endl;
-	cout << "flag : " << flag << endl;
-	cout << "aaaa" << endl;
+	//cout << "flag : " << flag << endl;
 
 	while (!operators.empty()) {
 		//calculate remain numbers, operators
-		cout << "bbbb" << endl;
-		if (!is_init) {
+		if (meaning) {
 			//if number is meaningful
 			once_calculate(ins, numbers, operators, number, symbol);
 			number = 0;
-			is_init = true;
+			meaning = false;
 		}
 		else {
 			//if number is meaningless
 			recursive_calculate(numbers, operators);
 		}
 	}
-	cout << "iiii" << endl;
 	//return result
-	if (operators.empty() && left_parenthesis == right_parenthesis && flag == true) {
-		cout << "jjjj" << endl;
+	if (operators.empty() && balance == 0 && flag == true) {
 		return numbers.top();
 	}
 	else {
-		cout << "kkkk" << endl;
 		return NULL;
 	}
 }
@@ -161,15 +153,9 @@ void recursive_calculate(stack<int>& numbers, stack<char>& operators) {
 void print_result() {
 	do {
 		int result = calculator(cin);
-		cout << "--------------------" << endl;
-		if (flag == true) {
-			cout << "result : " << result << endl;
-		}
-		else {
-			cout << "Error!" << endl;
-		}
+		if (flag == true) {	cout << "result : " << result << endl;	}
+		else {	cout << "Error!" << endl;	}
 		cin.ignore(INT_MAX, '\n');
-		cout << "--------------------" << endl;
 	} while (cin && cin.peek() != '0');
 }
 

@@ -29,9 +29,9 @@ int calculator(istream& ins) {
 
 	while (ins && ins.peek() != '\n' ) {
 		//claculate ins[0] ~ ins[end]
+
 		if (isdigit(ins.peek())) {
 			//peek is digit, store number decimally
-			
 			int tmp;
 			ins >> tmp;
 			number = number * 10 + tmp;
@@ -39,9 +39,9 @@ int calculator(istream& ins) {
 		}
 		else {
 			//peek is not digit
+
 			if (operators.empty() || ins.peek() == LEFT_PARENTHESIS || (ins.peek() != RIGHT_PARENTHESIS && operators.top() == LEFT_PARENTHESIS)) {
 				//if operators is empty or peek is '(' or operator.top is '('
-				
 				ins >> symbol;
 				operators.push(symbol);
 				balance++;
@@ -52,19 +52,19 @@ int calculator(istream& ins) {
 					}
 					balance--;
 				}
-				
 			}
+
 			else if (priority[operators.top()] < priority[(char)ins.peek()]) {
 				//if peek > top
 				if(meaning) numbers.push(number);
 				ins >> symbol;
 				operators.push(symbol);
 			}
+
 			else {
 				//if peek <= top or peek == ')'
 				if (ins.peek() == RIGHT_PARENTHESIS) {
 					//if peek == ')'
-					
 					if (operators.top() != LEFT_PARENTHESIS) {
 						if (meaning) {
 							once_calculate(ins, numbers, operators, number, symbol);
@@ -74,7 +74,6 @@ int calculator(istream& ins) {
 							ins >> symbol;
 						}
 					}
-
 					balance--;
 					if(operators.top() == RIGHT_PARENTHESIS)  operators.pop();
 					//remove ')' from operators
@@ -85,7 +84,6 @@ int calculator(istream& ins) {
 					}
 					if (!operators.empty())  operators.pop();
 					//remove '(' from operators
-					
 				}
 				else if (priority[(char)ins.peek()] < priority[operators.top()]) {
 					//if peek < top 
@@ -103,7 +101,7 @@ int calculator(istream& ins) {
 			meaning = false;
 		}
 	}
-	cout << "balance : " << balance << endl;
+
 	do {
 		//calculate remain numbers, operators
 		if (meaning) {
@@ -117,8 +115,10 @@ int calculator(istream& ins) {
 			recursive_calculate(numbers, operators);
 		}
 	} while (numbers.size() > 1); //  !operators.empty()
-	//return result
+
+	
 	if (operators.empty() && balance == 0 && flag) {
+		//return result
 		return numbers.top();
 	}
 	else {

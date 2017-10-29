@@ -25,6 +25,7 @@ int calculator(istream& ins) {
 	char symbol;
 	flag = true;
 	bool is_init = false;
+	
 
 	while (ins && ins.peek() != '\n' ) {
 		//translate ins[0] ~ ins[end]
@@ -34,6 +35,7 @@ int calculator(istream& ins) {
 			ins >> tmp;
 			number = number * 10 + tmp;
 			is_init = false;
+			
 		}
 		else {
 			//peek is not digit
@@ -43,7 +45,8 @@ int calculator(istream& ins) {
 				operators.push(symbol);
 				left_parenthesis++;
 				if (operators.top() != LEFT_PARENTHESIS) {
-					if (number != 0) {
+					//if operators is empty or operators.top is '('
+					if (!is_init) {
 						numbers.push(number);
 					}
 					left_parenthesis--;
@@ -72,23 +75,17 @@ int calculator(istream& ins) {
 					operators.pop();
 					//remove '(' from operators
 				}
-				else if (number == 0) {
-					//if peek < top and number == 0
-					if (numbers.size() == 1) {
+				else if (priority[(char)ins.peek()] < priority[operators.top()]) {
+					//if peek < top 
+					if (!is_init) {
 						once_calculate(ins, numbers, operators, number, symbol);
 					}
 					else {
 						recursive_calculate(numbers, operators);
 						ins >> symbol;
 						operators.push(symbol);
-					}
-					
+					}	
 				}
-				else {
-					once_calculate(ins, numbers, operators, number, symbol);
-				}
-				
-				
 			}
 			number = 0;
 			is_init = true;
@@ -101,27 +98,17 @@ int calculator(istream& ins) {
 	cout << "aaaa" << endl;
 
 	while (!operators.empty()) {
-		cout << "bbbb" << endl;
 		//calculate remain numbers, operators
-		if ((number != 0) ) {
-			//if end digit, numbers.size == 1
-			cout << "cccc" << endl;
+		cout << "bbbb" << endl;
+		if (!is_init) {
+			//if number is meaningful
 			once_calculate(ins, numbers, operators, number, symbol);
-			cout << "dddd" << endl;
+			number = 0;
+			is_init = true;
 		}
 		else {
-			//if end operator, numbers.size > 1
-			if (numbers.size() == 1) { 
-				//if number == 0, numbers.size > 1 -> devide by zero
-				cout << "eeee" << endl;
-				once_calculate(ins, numbers, operators, number, symbol);
-				cout << "ffff" << endl;
-			}
-			else {
-				cout << "gggg" << endl;
-				recursive_calculate(numbers, operators);
-				cout << "hhhh" << endl;
-			}
+			//if number is meaningless
+			recursive_calculate(numbers, operators);
 		}
 	}
 	cout << "iiii" << endl;
@@ -134,7 +121,6 @@ int calculator(istream& ins) {
 		cout << "kkkk" << endl;
 		return NULL;
 	}
-	
 }
 
 void once_calculate(istream& ins, stack<int>& numbers, stack<char>& operators, int& number, char& symbol) {
@@ -145,16 +131,8 @@ void once_calculate(istream& ins, stack<int>& numbers, stack<char>& operators, i
 	case '+': numbers.push(num1 + num2); break;
 	case '-': numbers.push(num1 - num2); break;
 	case '*': numbers.push(num1 * num2); break;
-	case '/': 
-		if (num2 == 0) {
-			flag = false; break;
-		}
-		numbers.push(num1 / num2); break;
-	case '%': 
-		if (num2 == 0) {
-			flag = false; break;
-		}
-		numbers.push(num1 % num2); break;
+	case '/': if (num2 == 0) { flag = false; break; } numbers.push(num1 / num2); break;
+	case '%': if (num2 == 0) { flag = false; break;	} numbers.push(num1 % num2); break;
 	case '^': numbers.push((int)pow(num1, num2)); break;
 	}
 	operators.pop();
@@ -173,16 +151,8 @@ void recursive_calculate(stack<int>& numbers, stack<char>& operators) {
 	case '+': numbers.push(num1 + num2); break;
 	case '-': numbers.push(num1 - num2); break;
 	case '*': numbers.push(num1 * num2); break;
-	case '/': 
-		if (num2 == 0) {
-			flag = false; break;
-		}
-		numbers.push(num1 / num2); break;
-	case '%': 
-		if (num2 == 0) {
-			flag = false; break;
-		}
-		numbers.push(num1 % num2); break;
+	case '/': if (num2 == 0) { flag = false; break;	} numbers.push(num1 / num2); break;
+	case '%': if (num2 == 0) { flag = false; break; } numbers.push(num1 % num2); break;
 	case '^': numbers.push((int)pow(num1, num2)); break;
 	}
 	operators.pop();
@@ -191,6 +161,7 @@ void recursive_calculate(stack<int>& numbers, stack<char>& operators) {
 void print_result() {
 	do {
 		int result = calculator(cin);
+		cout << "--------------------" << endl;
 		if (flag == true) {
 			cout << "result : " << result << endl;
 		}
@@ -198,6 +169,7 @@ void print_result() {
 			cout << "Error!" << endl;
 		}
 		cin.ignore(INT_MAX, '\n');
+		cout << "--------------------" << endl;
 	} while (cin && cin.peek() != '0');
 }
 

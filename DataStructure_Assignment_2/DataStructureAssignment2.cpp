@@ -31,6 +31,7 @@ int calculator(istream& ins) {
 		//claculate ins[0] ~ ins[end]
 		if (isdigit(ins.peek())) {
 			//peek is digit, store number decimally
+			
 			int tmp;
 			ins >> tmp;
 			number = number * 10 + tmp;
@@ -38,8 +39,9 @@ int calculator(istream& ins) {
 		}
 		else {
 			//peek is not digit
-			if (operators.empty() || ins.peek() == LEFT_PARENTHESIS || operators.top() == LEFT_PARENTHESIS) {
+			if (operators.empty() || ins.peek() == LEFT_PARENTHESIS || (ins.peek() != RIGHT_PARENTHESIS && operators.top() == LEFT_PARENTHESIS)) {
 				//if operators is empty or peek is '(' or operator.top is '('
+				
 				ins >> symbol;
 				operators.push(symbol);
 				balance++;
@@ -54,7 +56,7 @@ int calculator(istream& ins) {
 			}
 			else if (priority[operators.top()] < priority[(char)ins.peek()]) {
 				//if peek > top
-				numbers.push(number);
+				if(meaning) numbers.push(number);
 				ins >> symbol;
 				operators.push(symbol);
 			}
@@ -62,9 +64,19 @@ int calculator(istream& ins) {
 				//if peek <= top or peek == ')'
 				if (ins.peek() == RIGHT_PARENTHESIS) {
 					//if peek == ')'
-					once_calculate(ins, numbers, operators, number, symbol);
+					
+					if (operators.top() != LEFT_PARENTHESIS) {
+						if (meaning) {
+							once_calculate(ins, numbers, operators, number, symbol);
+						}
+						else {
+							recursive_calculate(numbers, operators); 
+							ins >> symbol;
+						}
+					}
+
 					balance--;
-					operators.pop();
+					if(operators.top() == RIGHT_PARENTHESIS)  operators.pop();
 					//remove ')' from operators
 					if (!operators.empty()) {
 						while (operators.top() != LEFT_PARENTHESIS) {
@@ -73,6 +85,7 @@ int calculator(istream& ins) {
 					}
 					if (!operators.empty())  operators.pop();
 					//remove '(' from operators
+					
 				}
 				else if (priority[(char)ins.peek()] < priority[operators.top()]) {
 					//if peek < top 
@@ -90,7 +103,7 @@ int calculator(istream& ins) {
 			meaning = false;
 		}
 	}
-
+	cout << "balance : " << balance << endl;
 	do {
 		//calculate remain numbers, operators
 		if (meaning) {

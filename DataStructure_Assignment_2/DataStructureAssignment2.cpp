@@ -1,5 +1,6 @@
 // DataStructureAssignment2.cpp : 콘솔 응용 프로그램에 대한 진입점을 정의합니다.
 // 컴소과 2013726058 최형준
+// this source code wrote in Visual Studio 2017 
 #include "stdafx.h"
 
 int calculator(istream& ins);
@@ -10,6 +11,8 @@ bool flag = true; //to deal with "devided by zero"
 int balance = 0; //to deal with "parenthesis"
 
 int calculator(istream& ins) {
+	//pre : input istream (cin)
+	//post : left one element in numbers, possible no element in operators
 	const char LEFT_PARENTHESIS = '(';
 	const char RIGHT_PARENTHESIS = ')';
 	
@@ -29,7 +32,8 @@ int calculator(istream& ins) {
 
 	while (ins && ins.peek() != '\n' ) {
 		//claculate ins[0] ~ ins[end]
-
+		//pre : cin isn't empty
+		//post : one calculate cycle is done when iterator scan '\n'
 		if (isdigit(ins.peek())) {
 			//peek is digit, store number decimally
 			int tmp;
@@ -39,7 +43,6 @@ int calculator(istream& ins) {
 		}
 		else {
 			//peek is not digit
-
 			if (operators.empty() || ins.peek() == LEFT_PARENTHESIS || (ins.peek() != RIGHT_PARENTHESIS && operators.top() == LEFT_PARENTHESIS)) {
 				//if operators is empty or peek is '(' or operator.top is '('
 				ins >> symbol;
@@ -104,6 +107,8 @@ int calculator(istream& ins) {
 
 	do {
 		//calculate remain numbers, operators
+		//pre : no exist balanced parenthesis in operators
+		//post : remain one element in numbers
 		if (meaning) {
 			//if number is meaningful
 			once_calculate(ins, numbers, operators, number, symbol);
@@ -127,6 +132,8 @@ int calculator(istream& ins) {
 }
 
 void once_calculate(istream& ins, stack<int>& numbers, stack<char>& operators, int& number, char& symbol) {
+	//pre : meaning is true, exist one element to calculate in numbers
+	//post : result is pushed in numbers, scaned operator is pushed in poerators
 	int num1, num2;
 	if (numbers.size() < 1) return;
 	num1 = numbers.top(); numbers.pop();
@@ -147,6 +154,8 @@ void once_calculate(istream& ins, stack<int>& numbers, stack<char>& operators, i
 }
 
 void recursive_calculate(stack<int>& numbers, stack<char>& operators) {
+	//pre : exist two element to calculate in numbers
+	//post : result is pushed in numbers, throw scaned operator
 	int num1, num2;
 	if (numbers.size() < 2) return;
 	num2 = numbers.top(); numbers.pop();
@@ -164,6 +173,8 @@ void recursive_calculate(stack<int>& numbers, stack<char>& operators) {
 }
 
 void print_result() {
+	//pre : 
+	//post : correctly print result
 	do {
 		int result = calculator(cin);
 		if (flag == true && balance == 0) {	cout << "result : " << result << endl;	}
